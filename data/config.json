@@ -1,0 +1,20 @@
+{
+  "deviceName": "JasTapBox1",
+  "ledBrightness": 128,
+  "light": {
+    "knownDefaultColor": "#00FF00",
+    "unknownDefaultColor": "#00FFFF",
+    "knownCardAnimation": "solid",
+    "unknownCardAnimation": "solid",
+    "lightDuration": 1000,
+    "numberOfBlinks": 2
+  },
+  "wifi": {
+    "ssid": "SEND",
+    "password": "@send123!"
+  },
+  "iot": {
+    "enabled": true,
+    "mode": "A9G"
+  }
+}
