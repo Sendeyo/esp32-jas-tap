@@ -16,6 +16,9 @@ Adafruit_NeoPixel pixels(NUM_PIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 DeviceConfig deviceConfig;
 
+HardwareSerial sim800(1); // Use UART1
+
+
 // --- State variables for non-blocking solid effect ---
 bool effectActive = false;
 unsigned long effectStartTime = 0;
@@ -82,6 +85,30 @@ void clearLEDs() {
   lastCardUID = "";
 }
 
+void initSIM800L() {
+  sim800.begin(9600, SERIAL_8N1, 16, 17); // RX, TX
+  Serial.println("Initializing SIM800L...");
+
+  sim800.println("AT");
+  delay(1000);
+  while (sim800.available()) {
+    Serial.write(sim800.read());
+  }
+
+  sim800.println("AT+CSQ");  // Signal quality
+  delay(1000);
+  while (sim800.available()) {
+    Serial.write(sim800.read());
+  }
+
+  sim800.println("AT+CCID");  // SIM card ID
+  delay(1000);
+  while (sim800.available()) {
+    Serial.write(sim800.read());
+  }
+}
+
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting NFC + LED Ring...");
@@ -90,6 +117,9 @@ void setup() {
   pixels.clear();
   pixels.setBrightness(128);  // Will be overridden
   pixels.show();
+
+  initSIM800L();
+
 
   if (!LittleFS.begin()) {
     Serial.println("LittleFS mount failed!");
