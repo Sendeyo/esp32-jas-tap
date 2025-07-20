@@ -6,7 +6,7 @@
     "unknownDefaultColor": "#00FFFF",
     "knownCardAnimation": "solid",
     "unknownCardAnimation": "solid",
-    "lightDuration": 1000,
+    "lightDuration": 500,
     "numberOfBlinks": 2
   },
   "wifi": {
