@@ -1,6 +1,8 @@
 {
   "deviceName": "JasTapBox1",
   "ledBrightness": 128,
+  "mode":1,
+  "hotspotPassword":"12345678",
   "light": {
     "knownDefaultColor": "#00FF00",
     "unknownDefaultColor": "#00FFFF",
@@ -9,12 +11,29 @@
     "lightDuration": 500,
     "numberOfBlinks": 2
   },
+  "sound":{
+    "tapDetection" : true,
+    "volume" : 100,
+    "onStatus" : false,
+    "duration" : 10
+  },
   "wifi": {
     "ssid": "SEND",
     "password": "@send123!"
   },
+  "server": {
+    "address": "35.202.151.232",
+    "port": 8000
+  },
+  "mqtt": {
+    "enable": 1,
+    "host": "35.202.151.232",
+    "port": 1883,
+    "topic": "jas/tap",
+    "user": "admin",
+    "pass": "admin"
+  },
   "iot": {
-    "enabled": true,
-    "mode": "A9G"
+    "enabled": true
   }
 }
