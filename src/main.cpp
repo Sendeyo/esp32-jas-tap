@@ -1,3 +1,4 @@
+#include <ElegantOTA.h>
 #include <Wire.h>
 #include <Adafruit_PN532.h>
 #include <Adafruit_NeoPixel.h>
@@ -158,7 +159,7 @@ void clearLEDs() {
 void connectToWiFi() {
   Serial.println("Setting up AP + STA...");
   WiFi.mode(WIFI_AP_STA);
-  bool apSuccess = WiFi.softAP("JasTapBox 1", "12345678");
+  bool apSuccess = WiFi.softAP(deviceConfig.deviceName, deviceConfig.hotspotPassword);
 
   if (apSuccess) {
     Serial.println("Access Point started");
@@ -612,13 +613,14 @@ void setup() {
     Serial.println("PN532 not found.");
     while (true);
   }
+  server.begin();
+  ElegantOTA.begin(&server, "admin", "admin@123");
+  Serial.println("HTTP server started with ElegantOTA");
 
   // ✅ Replace Async handlers with sync server routes
   server.on("/", HTTP_GET, handleRoot);
   server.on("/save", HTTP_POST, handleSave);
-  server.begin();
   Serial.println("HTTP server started");
-
   server.on("/lastuid", HTTP_GET, handleLastUID);
   server.on("/cards", HTTP_GET, handleListCards);
   server.on("/cards/add", HTTP_POST, handleAddCard);
