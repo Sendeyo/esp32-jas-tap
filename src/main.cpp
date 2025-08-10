@@ -38,16 +38,14 @@ const unsigned long ntpTimeout = 10000; // 10 seconds
 unsigned long lastAPCheck = 0;
 const unsigned long AP_CHECK_INTERVAL = 10000; // 10 seconds
 
-float readBatteryVoltage()
-{
+float readBatteryVoltage(){
   int raw = analogRead(BATTERY_PIN);
   float v = (raw / 4095.0) * 3.3; // measured at ADC pin
   const float divider = 2.0;      // update if resistor values imply different ratio
   return v * divider;
 }
 
-int batteryPercentage(float voltage)
-{
+int batteryPercentage(float voltage){
   if (voltage >= 4.2)
     return 100;
   else if (voltage <= 3.0)
@@ -56,15 +54,13 @@ int batteryPercentage(float voltage)
     return (int)(((voltage - 3.0) / (4.2 - 3.0)) * 100);
 }
 
-void beep(int duration = 50)
-{
+void beep(int duration = 50){
   digitalWrite(BUZZER_PIN, HIGH);
   delay(duration);
   digitalWrite(BUZZER_PIN, LOW);
 }
 
-uint32_t parseHexColor(const String &hexColor)
-{
+uint32_t parseHexColor(const String &hexColor){
   if (hexColor.length() < 3)
     return pixels.Color(0, 0, 0); // Default black
 
@@ -92,8 +88,7 @@ uint32_t parseHexColor(const String &hexColor)
   return pixels.Color(r, g, b);
 }
 
-String loadConfigAsString()
-{
+String loadConfigAsString(){
   File configFile = LittleFS.open("/config.json", "r");
   if (!configFile)
     return "{}";
@@ -102,8 +97,7 @@ String loadConfigAsString()
   return content;
 }
 
-bool saveConfigFromString(const String &jsonString)
-{
+bool saveConfigFromString(const String &jsonString){
   File configFile = LittleFS.open("/config.json", "w");
   if (!configFile)
     return false;
@@ -112,8 +106,7 @@ bool saveConfigFromString(const String &jsonString)
   return true;
 }
 
-void logActivity(const String &uid, const String &status)
-{
+void logActivity(const String &uid, const String &status){
   File f = LittleFS.open("/activities.log", "a");
   if (!f)
   {
@@ -148,8 +141,7 @@ void logActivity(const String &uid, const String &status)
   Serial.printf("📄 Logged activity: %s %s\n", uid.c_str(), status.c_str());
 }
 
-void startSolidEffect(uint32_t color)
-{
+void startSolidEffect(uint32_t color){
   // Ensure brightness is within safe bounds
   uint8_t brightness = constrain(deviceConfig.ledBrightness, 5, 255);
   pixels.setBrightness(brightness);
@@ -164,8 +156,7 @@ void startSolidEffect(uint32_t color)
   currentColor = color;
 }
 
-void clearLEDs()
-{
+void clearLEDs(){
   pixels.clear();
   pixels.show();
   effectActive = false;
@@ -173,8 +164,7 @@ void clearLEDs()
 }
 
 // Start the Access Point with static IP and stability tweaks
-void startAP(const char *ssid, const char *pass)
-{
+void startAP(const char *ssid, const char *pass){
   WiFi.mode(WIFI_AP_STA); // AP + STA mode
 
   esp_wifi_set_ps(WIFI_PS_NONE); // disable power save for better AP stability
@@ -200,8 +190,7 @@ void startAP(const char *ssid, const char *pass)
 }
 
 // Periodic AP check to ensure it stays alive
-void ensureAPAlive(const char *ssid, const char *pass)
-{
+void ensureAPAlive(const char *ssid, const char *pass){
   if (millis() - lastAPCheck < AP_CHECK_INTERVAL)
     return;
   lastAPCheck = millis();
@@ -213,8 +202,7 @@ void ensureAPAlive(const char *ssid, const char *pass)
   }
 }
 
-void connectToWiFi()
-{
+void connectToWiFi(){
   Serial.println("Setting up AP + STA...");
   WiFi.mode(WIFI_AP_STA);
 
@@ -239,8 +227,7 @@ void connectToWiFi()
   }
 }
 
-void handleRoot()
-{
+void handleRoot(){
   String html = "<html><body><h2>Edit Config</h2>";
   html += "<form method='POST' action='/save'>";
   html += "<textarea name='config' rows='30' cols='80'>";
@@ -256,8 +243,7 @@ void handleRoot()
   server.send(200, "text/html", html);
 }
 
-void handleSave()
-{
+void handleSave(){
   if (!server.hasArg("config"))
   {
     server.send(400, "text/plain", "Missing config data.");
@@ -288,8 +274,7 @@ void handleSave()
   }
 }
 
-void handleManageUI()
-{
+void handleManageUI(){
   String html = R"rawliteral(
     <html><body>
     <h2>Add New Card</h2>
@@ -359,8 +344,7 @@ void handleManageUI()
   server.send(200, "text/html", html);
 }
 
-void handleLastUID()
-{
+void handleLastUID(){
   if (lastCard == "")
   {
     server.send(200, "text/plain", "NO CARD"); // or optionally send "none"
@@ -372,8 +356,7 @@ void handleLastUID()
 }
 
 // Find a card in CSV file
-bool loadCardColorAndAnimation(String uidStr, String &colorHex, String &animation)
-{
+bool loadCardColorAndAnimation(String uidStr, String &colorHex, String &animation){
   File file = LittleFS.open("/cards.txt", "r");
   if (!file)
     return false;
@@ -405,8 +388,7 @@ bool loadCardColorAndAnimation(String uidStr, String &colorHex, String &animatio
 }
 
 // List all cards as JSON for UI
-void handleListCards()
-{
+void handleListCards(){
   File file = LittleFS.open("/cards.txt", "r");
   if (!file)
   {
@@ -446,8 +428,7 @@ void handleListCards()
 }
 
 // Add a card to CSV
-void handleAddCard()
-{
+void handleAddCard(){
   if (!server.hasArg("uid") || !server.hasArg("color") || !server.hasArg("animation"))
   {
     server.send(400, "text/plain", "Missing uid/color/animation");
@@ -482,8 +463,7 @@ void handleAddCard()
 }
 
 // Delete a card from CSV
-void handleDeleteCard()
-{
+void handleDeleteCard(){
   if (!server.hasArg("uid"))
   {
     server.send(400, "text/plain", "Missing uid");
@@ -523,10 +503,8 @@ void handleDeleteCard()
   server.send(200, "text/plain", "Card deleted.");
 }
 
-// Show bulk CSV editor
 // Show bulk CSV editor (stream large file safely)
-void handleCardsPage()
-{
+void handleCardsPage(){
   String html = R"rawliteral(
     <html>
     <body>
@@ -565,10 +543,8 @@ void handleCardsPage()
   server.send(200, "text/html", html);
 }
 
-// Save bulk CSV edits
 // Save bulk CSV edits without huge RAM usage
-void handleCardsSave()
-{
+void handleCardsSave(){
   if (!server.hasArg("cards"))
   {
     server.send(400, "text/plain", "Missing cards content");
@@ -597,8 +573,7 @@ void handleCardsSave()
               "<html><body><h2>Saved!</h2><a href='/card'>Back</a></body></html>");
 }
 
-void handleStatus()
-{
+void handleStatus(){
   DynamicJsonDocument doc(512);
 
   doc["device_name"] = deviceConfig.deviceName;
@@ -716,8 +691,18 @@ void WiFiEvent(WiFiEvent_t event) {
   }
 }
 
-void setup()
-{
+void modeTwo(const String &uid){
+  Serial.println(uid);
+  delay(200);
+  Serial.println("##########");
+}
+void modeThree(const String &uid){
+  Serial.println(uid);
+  delay(200);
+  Serial.println("##########");
+}
+
+void setup(){
   Serial.begin(115200);
   Serial.println("Starting NFC + LED Ring...");
 
@@ -848,8 +833,7 @@ void setup()
   showReadyAnimation();
 }
 
-void loop()
-{
+void loop(){
 
   server.handleClient(); // ✅ Required for WebServer to handle requests
 
@@ -867,9 +851,8 @@ void loop()
     }
   }
 
-  if (!effectActive && nfc.inListPassiveTarget())
+    if (!effectActive && nfc.inListPassiveTarget())
   {
-
     uint8_t uid[10];
     uint8_t uidLength;
 
@@ -886,27 +869,51 @@ void loop()
       Serial.println("Card UID: " + uidStr);
       lastCard = uidStr;
 
+      // Avoid re-processing the same card repeatedly; skip this read but continue loop
       if (uidStr == lastCardUID)
+      {
+        beep(100);
+        delay(100);
+        beep(100);
+        delay(100);
+        beep(100);
         return;
+      }
       lastCardUID = uidStr;
+      beep();
 
-      beep(); // make the beep sound
-      String colorHex, animation;
-      bool known = loadCardColorAndAnimation(uidStr, colorHex, animation);
-
-      if (!known)
+      // Mode-selection
+      if (deviceConfig.mode == 1)
       {
-        colorHex = deviceConfig.light.unknownDefaultColor;
-        animation = deviceConfig.light.unknownCardAnimation;
+        // existing behavior (Mode 1) - check cards.txt, color/animation as before
+         // keep your existing simple beep
+        String colorHex, animation;
+        bool known = loadCardColorAndAnimation(uidStr, colorHex, animation);
+
+        if (!known)
+        {
+          colorHex = deviceConfig.light.unknownDefaultColor;
+          animation = deviceConfig.light.unknownCardAnimation;
+        }
+
+        if (animation == "solid")
+        {
+          uint32_t color = parseHexColor(colorHex);
+          startSolidEffect(color);
+        }
+
+        logActivity(uidStr, known ? "allowed" : "unknown");
+      }
+      else if (deviceConfig.mode == 2)
+      {
+        modeTwo(uidStr);
+      }
+      else if (deviceConfig.mode == 3)
+      {
+        modeThree(uidStr);
       }
 
-      if (animation == "solid")
-      {
-        uint32_t color = parseHexColor(colorHex);
-        startSolidEffect(color);
-      }
-
-      logActivity(uidStr, known ? "allowed" : "unknown");
+      // other modes can be added here
     }
     delay(10);
   }
